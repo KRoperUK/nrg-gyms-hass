@@ -1,5 +1,7 @@
 # NRG Gyms Home Assistant Integration
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=KRoperUK&repository=nrg-gyms-hass)
+
 Custom integration that logs into NRG Gyms (PerfectGym client portal) and exposes upcoming bookings as:
 
  - Calendar entity: "NRG Upcoming Bookings" showing events (from MyCalendar with configurable club ID)
