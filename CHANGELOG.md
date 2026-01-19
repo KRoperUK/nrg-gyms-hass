@@ -1,4 +1,11 @@
-## 0.2.0 (2026-01-19)
+## [0.1.1](https://github.com/KRoperUK/nrg-gyms-hass/compare/v0.2.0...v0.1.1) (2026-01-19)
+
+
+### Bug Fixes
+
+* add user ([5b1e30b](https://github.com/KRoperUK/nrg-gyms-hass/commit/5b1e30bcf5eeacfc3a9cdd239843a58b6d40e284))
+
+## [0.2.0](https://github.com/KRoperUK/nrg-gyms-hass/compare/764e2c6803193d5acd4a45f9cec0be9fab3d0965...v0.2.0) (2026-01-19)
 
 
 ### Features
