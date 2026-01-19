@@ -23,27 +23,28 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Conventional Changelog / Tag / Release
+      - name: Conventional Changelog / Dev Tag
         id: changelog
         uses: TriPSs/conventional-changelog-action@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           output-file: CHANGELOG.md
-          tag-prefix: v
-          release-name: "Release v{{version}}"
+          tag-prefix: dev-v
+          release-name: "Development v{{version}}"
           skip-on-empty: true
           version-file: custom_components/nrg_gyms/manifest.json
           version-path: version
           preset: conventionalcommits
           create-summary: true
           skip-commit: false
+          skip-release: true
           git-user-name: github-actions
           git-user-email: github-actions@users.noreply.github.com
-          create-release: true
+          create-release: false
 
-      - name: Show release summary
+      - name: Show dev tag summary
         if: steps.changelog.outputs.skipped != 'true'
         run: |
-          echo "Version: ${{ steps.changelog.outputs.version }}"
-          echo "Tag: v${{ steps.changelog.outputs.version }}"
-          echo "Changelog file updated."
+          echo "Dev Version: ${{ steps.changelog.outputs.version }}"
+          echo "Dev Tag: dev-v${{ steps.changelog.outputs.version }}"
+          echo "Changelog file updated (commit not auto-pushed; awaiting PR approval)."
