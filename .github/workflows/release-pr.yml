@@ -27,14 +27,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           output-file: CHANGELOG.md
           tag-prefix: v
-          release-name: "Release v{{version}}"
           skip-on-empty: true
           version-file: custom_components/nrg_gyms/manifest.json
           version-path: version
           preset: conventionalcommits
           create-summary: true
           skip-tag: true
-          skip-release: true
           skip-commit: true
 
       - name: Create release PR
