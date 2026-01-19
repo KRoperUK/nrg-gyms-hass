@@ -30,7 +30,7 @@ Custom integration for NRG Gyms (PerfectGym portal) exposing bookings, occupancy
 ## Debug Logging
 Add to `configuration.yaml`:
 
-```
+```yaml
 logger:
   default: warning
   logs:
