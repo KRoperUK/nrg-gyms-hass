@@ -1,4 +1,11 @@
-## 0.2.0 (2026-01-19)
+## [0.3.0](https://github.com/KRoperUK/nrg-gyms-hass/compare/dev-v0.2.0...dev-v0.3.0) (2026-01-19)
+
+
+### Features
+
+* main release ([22c17bb](https://github.com/KRoperUK/nrg-gyms-hass/commit/22c17bbca690ad6e4c76aa89aec3bff149f795d2))
+
+## [0.2.0](https://github.com/KRoperUK/nrg-gyms-hass/compare/764e2c6803193d5acd4a45f9cec0be9fab3d0965...dev-v0.2.0) (2026-01-19)
 
 
 ### Features
