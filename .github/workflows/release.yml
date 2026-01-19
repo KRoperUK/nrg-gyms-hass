@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Conventional Changelog / Tag / Release
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          output-file: CHANGELOG.md
+          tag-prefix: v
+          release-name: "Release v{{version}}"
+          skip-on-empty: true
+          version-file: custom_components/nrg_gyms/manifest.json
+          version-path: version
+          preset: conventionalcommits
+          create-summary: true
+          skip-commit: false
+          git-user-name: github-actions
+          git-user-email: github-actions@users.noreply.github.com
+          create-release: true
+
+      - name: Show release summary
+        if: steps.changelog.outputs.skipped != 'true'
+        run: |
+          echo "Version: ${{ steps.changelog.outputs.version }}"
+          echo "Tag: v${{ steps.changelog.outputs.version }}"
+          echo "Changelog file updated."
