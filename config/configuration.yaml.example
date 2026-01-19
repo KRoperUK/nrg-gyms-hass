@@ -1,0 +1,17 @@
+homeassistant:
+  name: NRG Gyms Dev
+  latitude: 53.4
+  longitude: -2.2
+  elevation: 0
+  unit_system: metric
+  time_zone: Europe/London
+
+logger:
+  default: info
+  logs:
+    custom_components.nrg_gyms: debug
+    custom_components.nrg_gyms.client: debug
+
+# NRG Gyms Integration
+# Add via UI: Settings > Devices & Services > Create Integration
+# Enter your NRG Gyms portal email and password

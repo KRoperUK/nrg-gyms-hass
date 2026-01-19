@@ -1,0 +1,12 @@
+{
+  "domain": "nrg_gyms",
+  "name": "NRG Gyms",
+  "version": "0.1.0",
+  "documentation": "https://github.com/youruser/nrg-gyms-hass",
+  "requirements": [
+    "requests>=2.31.0"
+  ],
+  "codeowners": ["@youruser"],
+  "iot_class": "cloud_polling",
+  "config_flow": true
+}

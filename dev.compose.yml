@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  homeassistant:
+    image: homeassistant/home-assistant:latest
+    container_name: nrg-gyms-dev
+    ports:
+      - "8123:8123"
+    volumes:
+      - ./example-config:/config
+      - ./custom_components:/config/custom_components
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=UTC
+    restart: unless-stopped
+    networks:
+      - nrg-gyms
+
+networks:
+  nrg-gyms:
+    driver: bridge
