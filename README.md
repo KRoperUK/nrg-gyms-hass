@@ -2,14 +2,51 @@
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=KRoperUK&repository=nrg-gyms-hass)
 
-Custom integration that logs into NRG Gyms (PerfectGym client portal) and exposes upcoming bookings as:
+Custom integration for NRG Gyms (PerfectGym portal) exposing bookings, occupancy, profile, and contracts.
 
- - Calendar entity: "NRG Upcoming Bookings" showing events (from MyCalendar with configurable club ID)
-- Sensors: bookings count and next booking summary
- - Sensors: club occupancy total with per-club counts
- - Sensor: user profile (name as value, attributes for email/phone/referral)
+## Entities
+- Calendar: **NRG Upcoming Bookings** (next event + full event list)
+- Calendar: **NRG Next Payment** (next membership payment date/amount)
+- Sensors:
+  - Bookings count, next booking summary (with attributes for start/end/location/description)
+  - Occupancy total + per-club occupancy (home club enabled by default)
+  - Profile (value = full name; attributes for user ID, email, phone, referral code, club name, photo URL)
+  - Member ID, Home Club, Email
+  - Contracts: active contract summary + next payment amount (GBP)
 
-Refresh interval: hourly.
+## Configuration
+1) Install (HACS custom repo or manual copy) to `custom_components/nrg_gyms`.
+2) Add integration via Settings → Devices & Services → Add Integration → "NRG Gyms"; enter email/password.
+3) Options (post-setup):
+   - Bookings path override (advanced)
+   - User ID / Club ID overrides
+   - Update interval (seconds; default 3600)
+
+## Notes
+- Bookings use MyCalendar endpoint with X-Hash; set club ID in Options if needed.
+- Occupancy via `Clubs/GetMembersInClubs`; auth from CpAuthToken cookie.
+- Profile/Contracts fetch identity first to get `user_id` and set home club; profile sensor shows avatar from portal photo URL.
+
+## Debug Logging
+Add to `configuration.yaml`:
+
+```
+logger:
+  default: warning
+  logs:
+    custom_components.nrg_gyms: debug
+    custom_components.nrg_gyms.client: debug
+```
+
+## Development
+
+Use the helper CLI to test login/bookings/occupancy/profile/contracts:
+
+```
+export NRG_EMAIL=you@example.com
+export NRG_PASSWORD=yourpassword
+./.venv/bin/python scripts/test_client.py
+```
 
 ## Installation
 
