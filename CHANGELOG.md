@@ -8,6 +8,15 @@
 
 - ci ([27a1a7f](https://github.com/KRoperUK/nrg-gyms-hass/commit/27a1a7fbb40c22da3e9de9b85570a7141aa4c650))
 
+## [0.5.1](https://github.com/KRoperUK/nrg-gyms-hass/compare/v0.5.0...v0.5.1) (2026-02-16)
+
+
+### Bug Fixes
+
+* **readme:** update release workflow badge link ([#6](https://github.com/KRoperUK/nrg-gyms-hass/issues/6)) ([b7a7586](https://github.com/KRoperUK/nrg-gyms-hass/commit/b7a7586cff4d520f43bbe3e6d9ae22144547b4b1))
+* **release:** format code with prettier before release ([#4](https://github.com/KRoperUK/nrg-gyms-hass/issues/4)) ([d2016b0](https://github.com/KRoperUK/nrg-gyms-hass/commit/d2016b0a2e4206f410a4e007c4f4585aec484472))
+* **release:** format code with prettier before release ([#8](https://github.com/KRoperUK/nrg-gyms-hass/issues/8)) ([41d23bd](https://github.com/KRoperUK/nrg-gyms-hass/commit/41d23bdcf4a529eb5ef19353bbbbb55513d7f186))
+
 ## [0.5.0](https://github.com/KRoperUK/nrg-gyms-hass/compare/v0.4.0...v0.5.0) (2026-02-16)
 
 ### Features
