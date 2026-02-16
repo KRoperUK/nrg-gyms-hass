@@ -1,19 +1,47 @@
-.PHONY: help dev-up dev-down dev-restart dev-logs dev-shell bootstrap clean
+
+# Python Virtual Environment
+VENV_NAME ?= .venv
+SHELL := /bin/bash
+PYTHON := python3
+VENV_ACTIVATE = . $(VENV_NAME)/bin/activate
+
+.PHONY: help dev-up dev-down dev-restart dev-logs dev-shell bootstrap clean venv ci-lint pytest pytest-live
 
 help:
 	@echo "NRG Gyms Home Assistant Integration - Development"
 	@echo ""
 	@echo "Available commands:"
-	@echo "  make bootstrap       - Create config directory and example files"
+	@echo "  make bootstrap       - Set up development environment (venv, dependencies)"
 	@echo "  make dev-up          - Start Home Assistant container"
 	@echo "  make dev-down        - Stop Home Assistant container"
 	@echo "  make dev-restart     - Restart Home Assistant container"
 	@echo "  make dev-logs        - Tail container logs"
 	@echo "  make dev-shell       - Open shell in running container"
 	@echo "  make clean           - Remove config volume (WARNING: data loss)"
+	@echo "  make venv            - Create and update virtual environment"
+	@echo "  make ci-lint         - Run linting (black, isort, mypy)"
+	@echo "  make pytest          - Run unit tests (skips live tests)"
+	@echo "  make pytest-live     - Run all tests including live tests (requires .env)"
 	@echo ""
 
-bootstrap:
+venv:
+	@echo "Creating venv..."
+	@rm -rf $(VENV_NAME)
+	@PYTHON_EXE="$(PYTHON)"; \
+	if [ -f .python-version ]; then \
+		VER=$$(cat .python-version); \
+		CANDIDATE=$$(ls -d $(HOME)/.pyenv/versions/$$VER*/bin/python3 2>/dev/null | head -n 1); \
+		if [ -n "$$CANDIDATE" ] && [ -x "$$CANDIDATE" ]; then \
+			PYTHON_EXE="$$CANDIDATE"; \
+		fi; \
+	fi; \
+	echo "Using python: $$PYTHON_EXE"; \
+	"$$PYTHON_EXE" -m venv $(VENV_NAME)
+	@$(VENV_ACTIVATE) && pip install --upgrade pip
+	@$(VENV_ACTIVATE) && pip install -r requirements-dev.txt
+	@echo "✓ Virtual environment ready (source $(VENV_NAME)/bin/activate)"
+
+bootstrap: venv
 	@echo "Setting up development environment..."
 	@mkdir -p example-config example-config/custom_components
 	@if [ ! -f example-config/configuration.yaml ]; then \
@@ -36,7 +64,7 @@ bootstrap:
 		echo "# Add via UI: Settings > Devices & Services > Create Integration" >> example-config/configuration.yaml; \
 	fi
 	@ln -sf ../custom_components example-config/custom_components 2>/dev/null || true
-	@echo "✓ Bootstrap complete. Run 'make dev-up' to start."
+	@echo "✓ Bootstrap complete. Run 'make dev-up' to start HA container."
 
 dev-up:
 	@echo "Starting Home Assistant..."
@@ -68,3 +96,22 @@ clean:
 	else \
 		echo "Cancelled"; \
 	fi
+
+ci-lint:
+	@$(VENV_ACTIVATE) && echo "Running Black..." && black --check .
+	@$(VENV_ACTIVATE) && echo "Running Isort..." && isort --check-only .
+	@$(VENV_ACTIVATE) && echo "Running Mypy..." && mypy .
+
+pytest:
+	@$(VENV_ACTIVATE) && pytest -v -m "not live"
+
+pytest-live:
+	@if [ -f .env ]; then \
+		export $$(cat .env | xargs) && $(VENV_ACTIVATE) && pytest -v; \
+	else \
+		echo "Error: .env file not found. Create one from .env.example to run live tests."; \
+		exit 1; \
+	fi
+
+# Alias for pytest-live with colon
+pytest\:live: pytest-live

@@ -29,26 +29,34 @@ BOOKINGS_CANDIDATE_PATHS = [
 
 
 class PerfectGymClient:
-    def __init__(self, email: str, password: str, bookings_path: Optional[str] = None, club_id: Optional[int] = None) -> None:
+    def __init__(
+        self,
+        email: str,
+        password: str,
+        bookings_path: Optional[str] = None,
+        club_id: Optional[int] = None,
+    ) -> None:
         self._email = email
         self._password = password
         self._bookings_path_override = bookings_path
         self._club_id = club_id
         self._session = requests.Session()
-        self._session.headers.update({
-            "Accept": "application/json, text/plain, */*",
-            "CP-LANG": "en",
-            "CP-MODE": "desktop",
-            "Content-Type": "application/json;charset=UTF-8",
-            "Origin": BASE_URL,
-            "Referer": f"{BASE_URL}/clientportal2/",
-            "X-Requested-With": "XMLHttpRequest",
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/143.0.0.0 Safari/537.36"
-            ),
-        })
+        self._session.headers.update(
+            {
+                "Accept": "application/json, text/plain, */*",
+                "CP-LANG": "en",
+                "CP-MODE": "desktop",
+                "Content-Type": "application/json;charset=UTF-8",
+                "Origin": BASE_URL,
+                "Referer": f"{BASE_URL}/clientportal2/",
+                "X-Requested-With": "XMLHttpRequest",
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/143.0.0.0 Safari/537.36"
+                ),
+            }
+        )
         # Cookie hints from portal
         self._session.cookies.set("websiteAnalyticsConsent", "true")
         self._session.cookies.set("customTrackingKey", "true")
@@ -62,13 +70,20 @@ class PerfectGymClient:
             }
             # Some portals require X-Hash header mirroring navigation state
             headers = {"X-Hash": "#/Login"}
-            resp = self._session.post(BASE_URL + LOGIN_PATH, data=json.dumps(payload), headers=headers, timeout=20)
+            resp = self._session.post(
+                BASE_URL + LOGIN_PATH,
+                data=json.dumps(payload),
+                headers=headers,
+                timeout=20,
+            )
             if resp.status_code == 200:
                 # Response can be JSON or empty; cookies/tokens are set server-side
                 _LOGGER.debug("Login response: %s", resp.text[:500])
                 self._ensure_auth_header_from_cookie()
                 return True
-            _LOGGER.error("Login failed: status=%s body=%s", resp.status_code, resp.text[:300])
+            _LOGGER.error(
+                "Login failed: status=%s body=%s", resp.status_code, resp.text[:300]
+            )
             return False
         except Exception as e:
             _LOGGER.exception("Login exception: %s", e)
@@ -80,7 +95,9 @@ class PerfectGymClient:
         if token:
             self._session.headers["Authorization"] = f"Bearer {token}"
 
-    def _try_endpoint(self, path: str, extra_headers: Optional[Dict[str, str]] = None) -> Optional[List[Dict[str, Any]]]:
+    def _try_endpoint(
+        self, path: str, extra_headers: Optional[Dict[str, str]] = None
+    ) -> Optional[List[Dict[str, Any]]]:
         url = BASE_URL + path
         try:
             headers = extra_headers or {}
@@ -133,15 +150,23 @@ class PerfectGymClient:
                 # Default to club id 5 (Manchester) if not provided
                 club_id = self._club_id or 5
                 date_str = now.date().isoformat()
-                extra_headers["X-Hash"] = f"#/Classes/{club_id}/Calendar?date={date_str}"
+                extra_headers["X-Hash"] = (
+                    f"#/Classes/{club_id}/Calendar?date={date_str}"
+                )
             # If endpoint likely accepts date range, try with params first
             if any(key in path.lower() for key in ("calendar", "schedule")):
-                ranged_path = f"{path}?start={now.isoformat()}&end={horizon.isoformat()}"
+                ranged_path = (
+                    f"{path}?start={now.isoformat()}&end={horizon.isoformat()}"
+                )
                 bookings = self._try_endpoint(ranged_path, extra_headers)
                 if bookings:
                     normalized = [self._normalize_booking(b) for b in bookings]
                     normalized = [b for b in normalized if b.get("start")]
-                    _LOGGER.debug("Fetched %d bookings from %s (ranged)", len(normalized), ranged_path)
+                    _LOGGER.debug(
+                        "Fetched %d bookings from %s (ranged)",
+                        len(normalized),
+                        ranged_path,
+                    )
                     return normalized
 
             bookings = self._try_endpoint(path, extra_headers)
@@ -186,7 +211,9 @@ class PerfectGymClient:
 
     def _normalize_booking(self, item: Dict[str, Any]) -> Dict[str, Any]:
         # Attempt to map common fields
-        title = item.get("Title") or item.get("ClassName") or item.get("Name") or "Booking"
+        title = (
+            item.get("Title") or item.get("ClassName") or item.get("Name") or "Booking"
+        )
         # Support MyCalendar keys
         start = self._parse_dt(
             item.get("StartTimeUtc")
@@ -195,12 +222,19 @@ class PerfectGymClient:
             or item.get("StartDate")
         )
         end = self._parse_dt(
-            item.get("EndTime")
-            or item.get("End")
-            or item.get("EndDate")
+            item.get("EndTime") or item.get("End") or item.get("EndDate")
         )
-        location = item.get("Club") or item.get("Zone") or item.get("Location") or item.get("ClubName")
-        coach = item.get("TrainerDisplayName") or item.get("Coach") or item.get("Instructor")
+        location = (
+            item.get("Club")
+            or item.get("Zone")
+            or item.get("Location")
+            or item.get("ClubName")
+        )
+        coach = (
+            item.get("TrainerDisplayName")
+            or item.get("Coach")
+            or item.get("Instructor")
+        )
         description_parts = []
         if coach:
             description_parts.append(f"Coach: {coach}")
@@ -220,7 +254,13 @@ class PerfectGymClient:
             "location": location,
             "description": description,
         }
-        _LOGGER.debug("Normalized booking: title=%s start=%s end=%s location=%s", title, start, end, location)
+        _LOGGER.debug(
+            "Normalized booking: title=%s start=%s end=%s location=%s",
+            title,
+            start,
+            end,
+            location,
+        )
         return normalized
         description = "; ".join(description_parts) if description_parts else None
         return {
@@ -241,13 +281,19 @@ class PerfectGymClient:
             headers = {"X-Hash": "#/Clubs/MembersInClubs"}
             resp = self._session.post(url, data=b"", headers=headers, timeout=20)
             if resp.status_code != 200:
-                _LOGGER.error("Occupancy endpoint failed: status=%s body=%s", resp.status_code, resp.text[:300])
+                _LOGGER.error(
+                    "Occupancy endpoint failed: status=%s body=%s",
+                    resp.status_code,
+                    resp.text[:300],
+                )
                 return {"clubs": [], "total": 0}
             data = resp.json()
             clubs_raw: List[Dict[str, Any]] = []
             if isinstance(data, dict):
                 # Example: UsersInClubList: [{ ClubName, UsersCountCurrentlyInClub }]
-                if "UsersInClubList" in data and isinstance(data["UsersInClubList"], list):
+                if "UsersInClubList" in data and isinstance(
+                    data["UsersInClubList"], list
+                ):
                     clubs_raw = data["UsersInClubList"]
                 for key in ("Clubs", "Items", "Data", "Result", "results"):
                     if key in data and isinstance(data[key], list):
@@ -260,7 +306,13 @@ class PerfectGymClient:
             clubs: List[Dict[str, Any]] = []
             total = 0
             for c in clubs_raw:
-                name = c.get("ClubName") or c.get("Name") or c.get("Club") or c.get("name") or "Club"
+                name = (
+                    c.get("ClubName")
+                    or c.get("Name")
+                    or c.get("Club")
+                    or c.get("name")
+                    or "Club"
+                )
                 count = (
                     c.get("UsersCountCurrentlyInClub")
                     or c.get("MembersInClubCount")
@@ -272,11 +324,13 @@ class PerfectGymClient:
                     count = int(count) if count is not None else 0
                 except Exception:
                     count = 0
-                clubs.append({
-                    "name": name,
-                    "members": count,
-                    "id": c.get("ClubId") or c.get("Id") or c.get("id"),
-                })
+                clubs.append(
+                    {
+                        "name": name,
+                        "members": count,
+                        "id": c.get("ClubId") or c.get("Id") or c.get("id"),
+                    }
+                )
                 total += count
             _LOGGER.debug("Fetched occupancy for %d clubs, total=%d", len(clubs), total)
             return {"clubs": clubs, "total": total}
@@ -295,16 +349,26 @@ class PerfectGymClient:
                 headers = {"X-Hash": f"#/Profile/Edit?userId={user_id}"}
                 body = {"userId": user_id}
                 auth_header = self._session.headers.get("Authorization") or ""
-                _LOGGER.debug("Profile headers being sent: X-Hash=%s, Authorization=%s", 
-                             headers.get("X-Hash"), 
-                             auth_header[:50] if auth_header else None)
+                _LOGGER.debug(
+                    "Profile headers being sent: X-Hash=%s, Authorization=%s",
+                    headers.get("X-Hash"),
+                    auth_header[:50] if auth_header else None,
+                )
                 resp = self._session.post(url, json=body, headers=headers, timeout=20)
             else:
                 # If no user_id provided, try with minimal headers
                 resp = self._session.post(url, data=b"", timeout=20)
-            _LOGGER.debug("Profile response status: %s, response text: %s", resp.status_code, resp.text[:500])
+            _LOGGER.debug(
+                "Profile response status: %s, response text: %s",
+                resp.status_code,
+                resp.text[:500],
+            )
             if resp.status_code != 200:
-                _LOGGER.error("Profile endpoint failed: status=%s body=%s", resp.status_code, resp.text[:300])
+                _LOGGER.error(
+                    "Profile endpoint failed: status=%s body=%s",
+                    resp.status_code,
+                    resp.text[:300],
+                )
                 return {}
             data = resp.json()
             model = data.get("Model") or {}
@@ -337,7 +401,11 @@ class PerfectGymClient:
         try:
             resp = self._session.post(url, data=b"", timeout=20)
             if resp.status_code != 200:
-                _LOGGER.error("Identity endpoint failed: status=%s body=%s", resp.status_code, resp.text[:300])
+                _LOGGER.error(
+                    "Identity endpoint failed: status=%s body=%s",
+                    resp.status_code,
+                    resp.text[:300],
+                )
                 return {}
             data = resp.json() or {}
             member = data.get("Member") or {}
@@ -372,9 +440,17 @@ class PerfectGymClient:
             headers = {"X-Hash": "#/Profile/Contract"}
             body = {"userId": user_id}
             resp = self._session.post(url, json=body, headers=headers, timeout=20)
-            _LOGGER.debug("Contracts response status: %s, body: %s", resp.status_code, resp.text[:500])
+            _LOGGER.debug(
+                "Contracts response status: %s, body: %s",
+                resp.status_code,
+                resp.text[:500],
+            )
             if resp.status_code != 200:
-                _LOGGER.error("Contracts endpoint failed: status=%s body=%s", resp.status_code, resp.text[:300])
+                _LOGGER.error(
+                    "Contracts endpoint failed: status=%s body=%s",
+                    resp.status_code,
+                    resp.text[:300],
+                )
                 return {"contracts": [], "active": None}
 
             data = resp.json() or {}
@@ -415,7 +491,11 @@ class PerfectGymClient:
         try:
             resp = self._session.get(url, timeout=20)
             if resp.status_code != 200:
-                _LOGGER.error("Products endpoint failed: status=%s body=%s", resp.status_code, resp.text[:300])
+                _LOGGER.error(
+                    "Products endpoint failed: status=%s body=%s",
+                    resp.status_code,
+                    resp.text[:300],
+                )
                 return {}
             data = resp.json() or {}
             club_name = data.get("ClubName")

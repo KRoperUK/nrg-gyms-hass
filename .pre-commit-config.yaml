@@ -1,0 +1,46 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 26.1.0
+    hooks:
+      - id: black
+  - repo: https://github.com/pycqa/isort
+    rev: 7.0.0
+    hooks:
+      - id: isort
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.19.1
+    hooks:
+      - id: mypy
+        args: [--explicit-package-bases]
+        additional_dependencies:
+          - types-requests
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: check-json
+  - repo: local
+    hooks:
+      - id: sort-manifest
+        name: Verify manifest.json key order
+        entry: bash -c 'diff <(jq -c " {domain, name} + (del(.domain, .name) | to_entries | sort_by(.key) | from_entries) " custom_components/nrg_gyms/manifest.json) <(jq -c . custom_components/nrg_gyms/manifest.json)'
+        language: system
+        files: manifest.json
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        stages: [pre-commit]
+        exclude: custom_components/nrg_gyms/manifest.json

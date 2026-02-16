@@ -1,0 +1,36 @@
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = false
+ignore_missing_imports = true
+check_untyped_defs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = "homeassistant.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [".git", "testing_config"]
+asyncio_mode = "auto"
+# Removed allow-hosts to let conftest.py handle socket enabling completely
+addopts = "--cov=custom_components.nrg_gyms --cov-report=term-missing --cov-report=xml"
+markers = [
+    "live: marks tests as live tests requiring credentials (deselect with '-m \"not live\"')",
+    "asyncio: mark test as async",
+    "enable_socket: enable socket access for tests",
+]
+
+[tool.coverage.run]
+source = ["custom_components/nrg_gyms"]
+omit = ["tests/*"]

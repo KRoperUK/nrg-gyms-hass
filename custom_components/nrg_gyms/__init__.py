@@ -8,22 +8,21 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from .client import PerfectGymClient
 from .const import (
-    DOMAIN,
-    DEFAULT_UPDATE_INTERVAL_SECONDS,
-    DATA_CLIENT,
-    DATA_COORDINATOR,
     CONF_BOOKINGS_PATH,
+    CONF_CLUB_ID,
+    CONF_UPDATE_INTERVAL,
+    CONF_USER_ID,
+    DATA_CLIENT,
+    DATA_CONTRACTS_COORDINATOR,
+    DATA_COORDINATOR,
+    DATA_IDENTITY_COORDINATOR,
     DATA_OCCUPANCY_COORDINATOR,
     DATA_PROFILE_COORDINATOR,
-    DATA_CONTRACTS_COORDINATOR,
-    CONF_USER_ID,
-    CONF_CLUB_ID,
-    DATA_IDENTITY_COORDINATOR,
-    CONF_UPDATE_INTERVAL,
     DEFAULT_UPDATE_INTERVAL_SECONDS,
+    DOMAIN,
 )
-from .client import PerfectGymClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,7 +35,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Allow user override of update interval via options; fallback to default
     try:
-        interval_seconds = int(entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL_SECONDS))
+        interval_seconds = int(
+            entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL_SECONDS)
+        )
         if interval_seconds <= 0:
             interval_seconds = DEFAULT_UPDATE_INTERVAL_SECONDS
     except Exception:
@@ -44,12 +45,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     bookings_path = entry.options.get(CONF_BOOKINGS_PATH)
     club_id = entry.options.get(CONF_CLUB_ID)
-    client = PerfectGymClient(email=email, password=password, bookings_path=bookings_path, club_id=club_id)
+    client = PerfectGymClient(
+        email=email, password=password, bookings_path=bookings_path, club_id=club_id
+    )
 
     # Run login in executor to avoid blocking
     success = await hass.async_add_executor_job(client.login)
     if not success:
-        _LOGGER.error("NRG Gyms: Login failed; check credentials or portal availability.")
+        _LOGGER.error(
+            "NRG Gyms: Login failed; check credentials or portal availability."
+        )
         # Still set up; coordinator will retry
 
     # If club_id not specified, default to identity home club
@@ -133,7 +138,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Create devices for grouping
     device_registry = await hass.async_add_executor_job(dr.async_get, hass)
-    
+
     # Occupancy device
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
@@ -142,7 +147,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         manufacturer="NRG Gyms",
         model="Occupancy Monitor",
     )
-    
+
     # Profile device
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,

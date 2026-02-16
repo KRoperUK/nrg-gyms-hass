@@ -49,3 +49,5 @@ docker-compose.override.yml
 .storage/
 .cache/
 tts/
+
+coverage.xml

@@ -1,10 +1,13 @@
 # NRG Gyms Home Assistant Integration
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=KRoperUK&repository=nrg-gyms-hass)
+[![CI](https://github.com/KRoperUK/nrg-gyms-hass/actions/workflows/ci.yml/badge.svg)](https://github.com/KRoperUK/nrg-gyms-hass/actions/workflows/ci.yml)
+[![release-please](https://github.com/KRoperUK/nrg-gyms-hass/actions/workflows/release-please.yml/badge.svg)](https://github.com/KRoperUK/nrg-gyms-hass/actions/workflows/release-please.yml)
 
 Custom integration for NRG Gyms (PerfectGym portal) exposing bookings, occupancy, profile, and contracts.
 
 ## Entities
+
 - Calendar: **NRG Upcoming Bookings** (next event + full event list)
 - Calendar: **NRG Next Payment** (next membership payment date/amount)
 - Sensors:
@@ -15,19 +18,22 @@ Custom integration for NRG Gyms (PerfectGym portal) exposing bookings, occupancy
   - Contracts: active contract summary + next payment amount (GBP)
 
 ## Configuration
-1) Install (HACS custom repo or manual copy) to `custom_components/nrg_gyms`.
-2) Add integration via Settings → Devices & Services → Add Integration → "NRG Gyms"; enter email/password.
-3) Options (post-setup):
+
+1. Install (HACS custom repo or manual copy) to `custom_components/nrg_gyms`.
+2. Add integration via Settings → Devices & Services → Add Integration → "NRG Gyms"; enter email/password.
+3. Options (post-setup):
    - Bookings path override (advanced)
    - User ID / Club ID overrides
    - Update interval (seconds; default 3600)
 
 ## Notes
+
 - Bookings use MyCalendar endpoint with X-Hash; set club ID in Options if needed.
 - Occupancy via `Clubs/GetMembersInClubs`; auth from CpAuthToken cookie.
 - Profile/Contracts fetch identity first to get `user_id` and set home club; profile sensor shows avatar from portal photo URL.
 
 ## Debug Logging
+
 Add to `configuration.yaml`:
 
 ```yaml
@@ -59,9 +65,9 @@ Credentials are stored securely in Home Assistant and used to authenticate again
 
 ## Notes
 
- - The PerfectGym portal has multiple possible endpoints for bookings. This integration now targets `MyCalendar/MyCalendar/GetCalendar` by default and uses `X-Hash` like `#/Classes/<clubId>/Calendar?date=YYYY-MM-DD`. Set your club ID in the integration Options.
- - Occupancy uses `Clubs/Clubs/GetMembersInClubs`. Authorization is taken from the `CpAuthToken` cookie set after login.
- - Profile uses `Profile/Profile/GetProfileForEdit`. If your portal requires a `userId`, set it in the integration Options.
+- The PerfectGym portal has multiple possible endpoints for bookings. This integration now targets `MyCalendar/MyCalendar/GetCalendar` by default and uses `X-Hash` like `#/Classes/<clubId>/Calendar?date=YYYY-MM-DD`. Set your club ID in the integration Options.
+- Occupancy uses `Clubs/Clubs/GetMembersInClubs`. Authorization is taken from the `CpAuthToken` cookie set after login.
+- Profile uses `Profile/Profile/GetProfileForEdit`. If your portal requires a `userId`, set it in the integration Options.
 
 ### Enable Debug Logging
 

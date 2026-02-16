@@ -7,13 +7,22 @@ from typing import Any, Dict
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, DATA_COORDINATOR, DATA_OCCUPANCY_COORDINATOR, DATA_PROFILE_COORDINATOR, DATA_CLIENT, DATA_CONTRACTS_COORDINATOR
+from .const import (
+    DATA_CLIENT,
+    DATA_CONTRACTS_COORDINATOR,
+    DATA_COORDINATOR,
+    DATA_OCCUPANCY_COORDINATOR,
+    DATA_PROFILE_COORDINATOR,
+    DOMAIN,
+)
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
     data = hass.data[DOMAIN][entry.entry_id]
     coordinator = data[DATA_COORDINATOR]
     occupancy_coordinator = data[DATA_OCCUPANCY_COORDINATOR]
@@ -40,7 +49,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         ActiveContractSensor(contracts_coordinator, entry),
         NextPaymentAmountSensor(contracts_coordinator, entry),
     ]
-    
+
     # Add per-club occupancy sensors; enable only home club (or first club if home unknown)
     if occupancy_coordinator.data and occupancy_coordinator.data.get("clubs"):
         preferred_id = home_club_id
@@ -54,17 +63,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             club_id = club.get("id")
             is_home = bool(
                 (preferred_id is not None and club_id == preferred_id)
-                or (preferred_id is None and preferred_name is not None and club_name == preferred_name)
+                or (
+                    preferred_id is None
+                    and preferred_name is not None
+                    and club_name == preferred_name
+                )
             )
             entities.append(
-                ClubOccupancySensor(occupancy_coordinator, entry, club_name, club_id, is_home)
+                ClubOccupancySensor(
+                    occupancy_coordinator, entry, club_name, club_id, is_home
+                )
             )
-    
+
     async_add_entities(entities, True)
 
 
 class BaseNrgSensor(SensorEntity):
-    def __init__(self, coordinator, entry: ConfigEntry, name: str, unique_suffix: str) -> None:
+    def __init__(
+        self, coordinator, entry: ConfigEntry, name: str, unique_suffix: str
+    ) -> None:
         self.coordinator = coordinator
         self._entry = entry
         self._attr_name = name
@@ -72,7 +89,9 @@ class BaseNrgSensor(SensorEntity):
         self._attr_should_poll = False
 
     async def async_added_to_hass(self) -> None:
-        self.async_on_remove(self.coordinator.async_add_listener(self.async_write_ha_state))
+        self.async_on_remove(
+            self.coordinator.async_add_listener(self.async_write_ha_state)
+        )
 
     async def async_update(self) -> None:
         await self.coordinator.async_request_refresh()
@@ -97,7 +116,11 @@ class NextBookingSensor(BaseNrgSensor):
         if not bookings:
             return None
         # Find nearest future booking
-        now = datetime.now(bookings[0]["start"].tzinfo) if bookings[0].get("start") else datetime.now()
+        now = (
+            datetime.now(bookings[0]["start"].tzinfo)
+            if bookings[0].get("start")
+            else datetime.now()
+        )
         upcoming = [b for b in bookings if b.get("start") and b["start"] >= now]
         if not upcoming:
             return None
@@ -115,7 +138,11 @@ class NextBookingSensor(BaseNrgSensor):
         bookings = list(self.coordinator.data or [])
         if not bookings:
             return None
-        now = datetime.now(bookings[0]["start"].tzinfo) if bookings[0].get("start") else datetime.now()
+        now = (
+            datetime.now(bookings[0]["start"].tzinfo)
+            if bookings[0].get("start")
+            else datetime.now()
+        )
         upcoming = [b for b in bookings if b.get("start") and b["start"] >= now]
         if not upcoming:
             return None
@@ -132,7 +159,9 @@ class NextBookingSensor(BaseNrgSensor):
 
 class ClubOccupancyTotalSensor(BaseNrgSensor):
     def __init__(self, coordinator, entry: ConfigEntry) -> None:
-        super().__init__(coordinator, entry, "NRG Club Occupancy Total", "occupancy_total")
+        super().__init__(
+            coordinator, entry, "NRG Club Occupancy Total", "occupancy_total"
+        )
         self._attr_icon = "mdi:account-group"
 
     @property
@@ -160,14 +189,27 @@ class ClubOccupancyTotalSensor(BaseNrgSensor):
 
 
 class ClubOccupancySensor(BaseNrgSensor):
-    def __init__(self, coordinator, entry: ConfigEntry, club_name: str, club_id: int | None, is_home: bool) -> None:
+    def __init__(
+        self,
+        coordinator,
+        entry: ConfigEntry,
+        club_name: str,
+        club_id: int | None,
+        is_home: bool,
+    ) -> None:
         self.club_name = club_name
         self.club_id = club_id
         self._is_home = is_home
         self._attr_entity_registry_enabled_by_default = bool(is_home)
         # Use outline variant for non-home clubs
-        self._attr_icon = "mdi:account-group" if is_home else "mdi:account-group-outline"
-        suffix = f"occupancy_{club_id}" if club_id else f"occupancy_{club_name.replace(' ', '_').lower()}"
+        self._attr_icon = (
+            "mdi:account-group" if is_home else "mdi:account-group-outline"
+        )
+        suffix = (
+            f"occupancy_{club_id}"
+            if club_id
+            else f"occupancy_{club_name.replace(' ', '_').lower()}"
+        )
         super().__init__(coordinator, entry, f"NRG {club_name} Occupancy", suffix)
 
     @property
@@ -334,7 +376,9 @@ class ActiveContractSensor(BaseNrgSensor):
 
 class NextPaymentAmountSensor(BaseNrgSensor):
     def __init__(self, coordinator, entry: ConfigEntry) -> None:
-        super().__init__(coordinator, entry, "NRG Next Payment Amount", "next_payment_amount")
+        super().__init__(
+            coordinator, entry, "NRG Next Payment Amount", "next_payment_amount"
+        )
         self._attr_icon = "mdi:cash"
         self._attr_native_unit_of_measurement = "GBP"
 
@@ -369,7 +413,9 @@ class NextPaymentAmountSensor(BaseNrgSensor):
             amount_fmt = None
         return {
             "contract": active.get("name"),
-            "next_payment_date": dt.isoformat() if hasattr(dt, "isoformat") and dt else None,
+            "next_payment_date": (
+                dt.isoformat() if hasattr(dt, "isoformat") and dt else None
+            ),
             "commitment_period": active.get("commitment_period"),
             "amount_formatted": amount_fmt,
         }
