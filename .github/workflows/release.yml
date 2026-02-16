@@ -13,4 +13,20 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v4.4.0
+      - uses: google-github-actions/release-please-action@v4
+        id: release
+      - name: Checkout PR branch
+        if: ${{ steps.release.outputs.pr }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ fromJson(steps.release.outputs.pr).headBranchName }}
+          fetch-depth: 0
+      - name: Run Prettier
+        if: ${{ steps.release.outputs.pr }}
+        run: |
+          npx prettier --write .
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .
+          git commit -m "chore: format with prettier" || echo "No changes to commit"
+          git push
