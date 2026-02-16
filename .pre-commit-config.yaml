@@ -22,3 +22,10 @@ repos:
       - id: trailing-whitespace
       - id: check-added-large-files
       - id: check-json
+  - repo: local
+    hooks:
+      - id: sort-manifest
+        name: Sort manifest.json
+        entry: bash -c 'jq --indent 2 " {domain, name} + (del(.domain, .name) | to_entries | sort_by(.key) | from_entries) " custom_components/nrg_gyms/manifest.json > custom_components/nrg_gyms/manifest.json.tmp && mv custom_components/nrg_gyms/manifest.json.tmp custom_components/nrg_gyms/manifest.json'
+        language: system
+        files: manifest.json
