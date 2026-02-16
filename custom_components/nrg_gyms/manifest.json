@@ -1,15 +1,11 @@
 {
   "domain": "nrg_gyms",
   "name": "NRG Gyms",
-  "codeowners": [
-    "@KRoperUK"
-  ],
+  "codeowners": ["@KRoperUK"],
   "config_flow": true,
   "documentation": "https://github.com/KRoperUK/nrg-gyms-hass",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/KRoperUK/nrg-gyms-hass/issues",
-  "requirements": [
-    "requests>=2.31.0"
-  ],
+  "requirements": ["requests>=2.31.0"],
   "version": "0.5.1"
 }
