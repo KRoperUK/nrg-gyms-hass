@@ -24,4 +24,3 @@
 
 * add user ([5b1e30b](https://github.com/KRoperUK/nrg-gyms-hass/commit/5b1e30bcf5eeacfc3a9cdd239843a58b6d40e284))
 * add user ([3f68c58](https://github.com/KRoperUK/nrg-gyms-hass/commit/3f68c58a3595dba5974e98424848025a38c9644b))
-

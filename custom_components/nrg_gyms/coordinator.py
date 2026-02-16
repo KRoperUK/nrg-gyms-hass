@@ -12,7 +12,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class NrgCoordinator(DataUpdateCoordinator):
-    def __init__(self, hass: HomeAssistant, client: PerfectGymClient, interval_seconds: int) -> None:
+    def __init__(
+        self, hass: HomeAssistant, client: PerfectGymClient, interval_seconds: int
+    ) -> None:
         super().__init__(
             hass,
             _LOGGER,
@@ -22,4 +24,6 @@ class NrgCoordinator(DataUpdateCoordinator):
         self._client = client
 
     async def _async_update_data(self):
-        return await self.hass.async_add_executor_job(self._client.fetch_upcoming_bookings)
+        return await self.hass.async_add_executor_job(
+            self._client.fetch_upcoming_bookings
+        )

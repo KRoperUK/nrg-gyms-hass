@@ -1,9 +1,11 @@
 """Tests for the NRG Gyms config flow."""
+
 from unittest.mock import MagicMock, patch
 
 from homeassistant import config_entries, data_entry_flow
 from homeassistant.core import HomeAssistant
-from custom_components.nrg_gyms.const import DOMAIN, CONF_EMAIL, CONF_PASSWORD
+
+from custom_components.nrg_gyms.const import CONF_EMAIL, CONF_PASSWORD, DOMAIN
 
 
 async def test_flow_user_init(hass: HomeAssistant) -> None:

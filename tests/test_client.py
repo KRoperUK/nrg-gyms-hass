@@ -1,4 +1,5 @@
 """Test the PerfectGymClient."""
+
 from unittest.mock import MagicMock, patch
 
 from custom_components.nrg_gyms.client import PerfectGymClient
